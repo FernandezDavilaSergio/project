@@ -250,10 +250,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple.shade300,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Simple GPTask'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.teal.shade900,
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -287,19 +287,20 @@ class _HomePageState extends State<HomePage> {
                               onPressed: (context) => deleteTask(index),
                               icon: Icons.delete,
                               label: 'Delete',
-                              backgroundColor: Colors.red,
+                              backgroundColor: Colors.redAccent,
                               foregroundColor: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ],
                         ),
                         child: Container(
-                          padding: const EdgeInsets.all(15), // Menos padding para los cuadros
+                          padding: const EdgeInsets.all(10), // Menos padding para los cuadros
                           margin: const EdgeInsets.symmetric(vertical: 5), // Margen entre tareas
                           decoration: BoxDecoration(
-                            color: Colors.deepPurple,
-                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.teal,
+                            borderRadius: BorderRadius.circular(10),
                           ),
+                          height: 120,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -319,7 +320,7 @@ class _HomePageState extends State<HomePage> {
                                       toDoList[index]['task'],
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 18,
+                                        fontSize: 22,
                                         decoration: toDoList[index]['completed']
                                             ? TextDecoration.lineThrough
                                             : TextDecoration.none,
@@ -333,13 +334,19 @@ class _HomePageState extends State<HomePage> {
                               if (toDoList[index]['startDate'] != null) ...[
                                 Text(
                                   'Start Date: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(toDoList[index]['startDate']))}',
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                  ),
                                 ),
                               ],
                               if (toDoList[index]['endDate'] != null) ...[
                                 Text(
                                   'End Date: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(toDoList[index]['endDate']))}',
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                  ),
                                 ),
                               ],
                             ],
@@ -357,7 +364,7 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.deepPurple.shade200,  // Color más claro para el recuadro
+              color: Colors.teal.shade200,  // Color más claro para el recuadro
               borderRadius: BorderRadius.circular(15), // Borde redondeado del contenedor
             ),
             child: Column(
@@ -368,15 +375,28 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _controller,
-                          decoration: InputDecoration(
-                            hintText: 'Enter your task', // Texto dentro del cuadro
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Borde redondeado
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2), // Color de la sombra
+                                spreadRadius: 2, // Extensión de la sombra
+                                blurRadius: 5,   // Difuminado de la sombra
+                                offset: Offset(2, 3), // Desplazamiento de la sombra
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _controller,
+                            decoration: InputDecoration(
+                              hintText: 'Enter your task', // Texto dentro del cuadro
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10), // Borde redondeado
+                                borderSide: BorderSide.none, // Sin borde
+                              ),
+                              filled: true,
+                              fillColor: Colors.white, // Fondo del cuadro de texto
                             ),
-                            filled: true,
-                            fillColor: Colors.deepPurple.shade300, // Fondo del cuadro de texto
                           ),
                         ),
                       ),
@@ -384,7 +404,15 @@ class _HomePageState extends State<HomePage> {
                     // Botón de añadir tarea con contorno redondeado
                     FloatingActionButton(
                       onPressed: saveNewTask,
-                      child: const Icon(Icons.add) // Color del botón
+                      backgroundColor: Colors.white, // Color de fondo del botón
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // Modifica este valor para ajustar el radio
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.green,
+                        size: 30,
+                      ), // Icono del botón
                     ),
                   ],
                 ),
