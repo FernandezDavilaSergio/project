@@ -295,7 +295,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(10), // Menos padding para los cuadros
-                          margin: const EdgeInsets.symmetric(vertical: 5), // Margen entre tareas
+                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Margen entre tareas
                           decoration: BoxDecoration(
                             color: Colors.teal,
                             borderRadius: BorderRadius.circular(10),
@@ -390,6 +390,9 @@ class _HomePageState extends State<HomePage> {
                             controller: _controller,
                             decoration: InputDecoration(
                               hintText: 'Enter your task', // Texto dentro del cuadro
+                              hintStyle: const TextStyle(
+                                  color: Colors.blueGrey
+                              ), // Color del texto
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10), // Borde redondeado
                                 borderSide: BorderSide.none, // Sin borde
@@ -423,6 +426,10 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => _selectDate(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal.shade900,
+                          foregroundColor: Colors.white,
+                        ),
                         child: Text(
                           _startDate != null
                               ? 'Start Date: ${DateFormat('dd/MM/yyyy').format(_startDate!)}'
@@ -434,6 +441,10 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => _selectDate(context, false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal.shade900,
+                          foregroundColor: Colors.white,
+                        ),
                         child: Text(
                           _endDate != null
                               ? 'End Date: ${DateFormat('dd/MM/yyyy').format(_endDate!)}'
