@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../utils/database_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +15,10 @@ class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
   List<Map<String, dynamic>> toDoList = [];
   late SharedPreferences prefs;
-  String? _selectedCategory; // Variable para almacenar la categoría seleccionada
+  String? _selectedCategory;
+
+  List<Map<String, dynamic>> successfulTasks = [];
+  List<Map<String, dynamic>> failedTasks = [];
 
   DateTime? _startDate;
   DateTime? _endDate;
@@ -25,6 +27,28 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  void markTaskCompleted(int index) {
+    setState(() {
+      Map<String, dynamic> task = toDoList[index];
+      DateTime? endDate = DateTime.parse(task['endDate']);
+      DateTime now = DateTime.now();
+
+      task['completed'] = true;
+
+      // Verificar si la tarea se completó a tiempo o no
+      if (now.isBefore(endDate) || now.isAtSameMomentAs(endDate)) {
+        successfulTasks.add(task);
+        _showMessage("Task completed successfully!", Colors.green);
+      } else {
+        failedTasks.add(task);
+        _showMessage("Task failed (completed late).", Colors.red);
+      }
+
+      // Eliminar de la lista original si lo deseas
+      toDoList.removeAt(index);
+    });
   }
 
   Future<void> _loadData() async {
@@ -63,7 +87,6 @@ class _HomePageState extends State<HomePage> {
 
     await _saveData();
 
-    // Mostrar mensaje de éxito
     _showMessage("Task added successfully!", Colors.green);
   }
 
@@ -84,7 +107,7 @@ class _HomePageState extends State<HomePage> {
         if (DateTime.now().isBefore(endDate)) {
           _showMessage("Task completed on time!", Colors.green);
         } else {
-          _showMessage("Task not completed on time.", Colors.red); // Mensaje cuando no se cumple a tiempo
+          _showMessage("Task not completed on time.", Colors.red);
         }
       }
     });
@@ -121,7 +144,7 @@ class _HomePageState extends State<HomePage> {
                     decoration: const InputDecoration(hintText: 'Edit your task'),
                     onChanged: (value) {
                       setState(() {
-                        toDoList[index]['task'] = value; // Actualizar en tiempo real
+                        toDoList[index]['task'] = value;
                       });
                     },
                   ),
@@ -142,9 +165,10 @@ class _HomePageState extends State<HomePage> {
                           : 'Select End Date',
                     ),
                   ),
-                  const SizedBox(height: 10), // Añade un espacio entre los botones
+                  const SizedBox(height: 10),
                   DropdownButton<String>(
                     value: _selectedCategory,
+                    hint: const Text('Select Category'),
                     onChanged: (String? newValue) {
                       setState(() {
                         _selectedCategory = newValue!;
@@ -173,12 +197,11 @@ class _HomePageState extends State<HomePage> {
                       _showMessage("Please select valid start and end dates.", Colors.red);
                       return;
                     }
-                    // Actualizar la tarea editada en la lista
                     setState(() {
                       toDoList[index]['task'] = _controller.text;
                       toDoList[index]['startDate'] = _startDate?.toIso8601String();
                       toDoList[index]['endDate'] = _endDate?.toIso8601String();
-                      toDoList[index]['category'] = _selectedCategory; // Guardar la categoría
+                      toDoList[index]['category'] = _selectedCategory;
                     });
 
                     // Actualizar el estado global
@@ -188,12 +211,12 @@ class _HomePageState extends State<HomePage> {
                       toDoList[index]['endDate'] = _endDate?.toIso8601String();
                     });
 
-                    _saveData();  // Guardar los cambios en almacenamiento persistente
+                    _saveData();
                     _controller.clear();
                     _startDate = null;
                     _endDate = null;
 
-                    Navigator.of(context).pop(); // Cerrar el diálogo
+                    Navigator.of(context).pop();
                     _showMessage("Task updated successfully!", Colors.green);
                   },
                   style: ElevatedButton.styleFrom(
@@ -264,7 +287,7 @@ class _HomePageState extends State<HomePage> {
       SnackBar(
         content: Text(message),
         backgroundColor: color,
-        duration: const Duration(seconds: 3), // Mostrar mensaje por 3 segundos
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -282,7 +305,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 10, left: 10, right: 10), // Padding en los bordes
+              padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
               child: ListView.builder(
                 itemCount: toDoList.length,
                 itemBuilder: (BuildContext context, index) {
@@ -316,8 +339,8 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                         child: Container(
-                          padding: const EdgeInsets.all(5), // Menos padding para los cuadros
-                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Margen entre tareas
+                          padding: const EdgeInsets.all(5),
+                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                           decoration: BoxDecoration(
                             color: Colors.teal,
                             borderRadius: BorderRadius.circular(10),
@@ -373,7 +396,7 @@ class _HomePageState extends State<HomePage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Category: ${toDoList[index]['category']}', // Mostrar categoría aquí
+                                        'Category: ${toDoList[index]['category']}',
                                         style: const TextStyle(color: Colors.white),
                                       ),
                                     ],
@@ -384,7 +407,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10), // Espacio entre tareas
+                      const SizedBox(height: 10),
                     ],
                   );
                 },
@@ -395,8 +418,8 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.teal.shade200,  // Color más claro para el recuadro
-              borderRadius: BorderRadius.circular(15), // Borde redondeado del contenedor
+              color: Colors.teal.shade200,
+              borderRadius: BorderRadius.circular(15),
             ),
             child: Column(
               children: [
@@ -409,50 +432,48 @@ class _HomePageState extends State<HomePage> {
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2), // Color de la sombra
-                                spreadRadius: 2, // Extensión de la sombra
-                                blurRadius: 5,   // Difuminado de la sombra
-                                offset: Offset(2, 3), // Desplazamiento de la sombra
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(2, 3),
                               ),
                             ],
                           ),
                           child: TextField(
                             controller: _controller,
                             decoration: InputDecoration(
-                              hintText: 'Enter your task', // Texto dentro del cuadro
+                              hintText: 'Enter your task',
                               hintStyle: const TextStyle(
                                   color: Colors.blueGrey
-                              ), // Color del texto
+                              ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10), // Borde redondeado
-                                borderSide: BorderSide.none, // Sin borde
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
                               ),
                               filled: true,
-                              fillColor: Colors.white, // Fondo del cuadro de texto
+                              fillColor: Colors.white,
                               counterText: '',
                             ),
-                            maxLength: 30, // Límite de 40 caracteres
+                            maxLength: 30,
                           ),
                         ),
                       ),
                     ),
-                    // Botón de añadir tarea con contorno redondeado
                     FloatingActionButton(
                       onPressed: saveNewTask,
-                      backgroundColor: Colors.white, // Color de fondo del botón
+                      backgroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10), // Modifica este valor para ajustar el radio
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
                         Icons.add,
                         color: Colors.green,
                         size: 30,
-                      ), // Icono del botón
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 15), // Espacio entre el cuadro de texto y los botones de fecha
-                // Botones de selección de fecha
+                const SizedBox(height: 15),
                 Row(
                   children: [
                     Expanded(
@@ -469,7 +490,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10), // Espacio horizontal entre los botones
+                    const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => _selectDate(context, false),
@@ -503,29 +524,29 @@ class _HomePageState extends State<HomePage> {
                   hint: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     decoration: BoxDecoration(
-                      color: Colors.teal.shade200, // Color de fondo del hint
-                      borderRadius: BorderRadius.circular(5), // Bordes redondeados
+                      color: Colors.teal.shade200,
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     child: const Text(
                       'Select Category',
                       style: TextStyle(
-                        color: Colors.white, // Color del texto
-                        fontWeight: FontWeight.bold, // Negrita
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   icon: const Icon(
-                    Icons.arrow_drop_down, // Icono del dropdown
-                    color: Colors.white, // Color del icono
+                    Icons.arrow_drop_down,
+                    color: Colors.white,
                   ),
-                  dropdownColor: Colors.teal.shade900, // Color de fondo del dropdown
+                  dropdownColor: Colors.teal.shade900,
                   style: const TextStyle(
-                    color: Colors.white, // Color del texto seleccionado
-                    fontWeight: FontWeight.bold, // Negrita
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                   underline: Container(
-                    height: 2, // Altura del borde inferior
-                    color: Colors.teal.shade600, // Color del borde
+                    height: 2,
+                    color: Colors.teal.shade600,
                   ),
                 ),
               ],
